@@ -5,16 +5,23 @@ package kevindamm.wits;
 message GameReplay {
   required GameState state = 2;
   
+  // The turns in the order of appearance, each containing the frames of play in a valid ordering.
   repeated Turn turns = 2;
 }
 
 message Turn {
-  optional int32 player_number = 1;
+  // The 1-indexed position of the player making this turn.
+  optional int32 player_id = 1;
+  
+  // Movements and actions of units during this turn, in a valid order.
   repeated Frame frames = 2;
 }
 
 message Frame {
   required FrameType frame_type = 1;
+  
+  optional MapPosition position = 2;
+  optional int32 unit_id = 3;
   
   // TODO remaining frame fields.
 }
@@ -32,11 +39,11 @@ enum FrameType {
   ROOT_BRAMBLE = 9;
   RETRACT_THORN = 10;
   
-  IGNORED = 100;  // Enum values greater than this are ignored.
-  START_TURN = 101;  // Redundant.
-  END_TURN = 102;  // Redundant.
-  SELECT_UNIT = 103;  // Extraneous.
-  SELECT_SPAWN_TILE = 104;  // Extraneous.
+  DEPRECATED = 100;  // Enum values greater than this are ignored.
+  DEPRECATED_START_TURN = 101;  // Redundant
+  DEPRECATED_END_TURN = 102;  // Redundant.
+  DEPRECATED_SELECT_UNIT = 103;  // Extraneous.
+  DEPRECATED_SELECT_SPAWN_TILE = 104;  // Extraneous.
 }
 
 message GameState {
@@ -71,7 +78,7 @@ message Unit {
   required Class class = 1;
   
   // Called 'identifier' in OSN unit, each unit in play gets a unique one.
-  required uint32 identity = 2;
+  required uint32 unit_id = 2;
   
   // These are expected to be populated.  Their default value of 0 makes them feckless otherwise.
   optional int32 health = 3;
@@ -86,7 +93,7 @@ message Unit {
   repeated int32 progeny = 8;  // This can be used as an accumulator to represent all indirect children.
   
   // This may change during play if a Scrambler gets control.
-  optional int32 player = 9;
+  optional int32 player_id = 9;
 }
 
 enum MapName {
