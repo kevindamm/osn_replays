@@ -1,0 +1,153 @@
+syntax = "proto3";
+
+package kevindamm.wits;
+
+message GameReplay {
+  required GameState state = 2;
+  
+  repeated Turn turns = 2;
+}
+
+message Turn {
+  optional int32 player_number = 1;
+  repeated Frame frames = 2;
+}
+
+message Frame {
+  required FrameType frame_type = 1;
+  
+  // TODO remaining frame fields.
+}
+
+enum FrameType {
+  UNDEFINED = 0;
+  MOVE = 1;
+  SPAWN = 2;  // Includes both SpawnUnitAction and SpawnThornAction.
+  ATTACK = 3;
+  HEAL = 4;
+  TOGGLE_BOMBSHELL = 5;
+  SCRAMBLER_SPELL = 6;
+  MOBI_EAT = 7;
+  MOBI_SPIT = 8;
+  ROOT_BRAMBLE = 9;
+  RETRACT_THORN = 10;
+  
+  IGNORED = 100;  // Enum values greater than this are ignored.
+  START_TURN = 101;  // Redundant.
+  END_TURN = 102;  // Redundant.
+  SELECT_UNIT = 103;  // Extraneous.
+  SELECT_SPAWN_TILE = 104;  // Extraneous.
+}
+
+message GameState {
+  optional MapName map_name = 1;
+  repeated PlayerState players = 2;
+  repeated Unit units = 3;
+  
+  optional uint32 turn_count = 3;
+  
+  // TODO other fields
+}
+
+message PlayerState {
+  optional int32 
+}
+
+message Unit {
+  // Based on the enumeration implicit in the OSN replay JSON property 'class'.
+  enum Class {
+    UNKNOWN = 0;
+    SOLDIER = 1;
+    RUNNER = 2;
+    HEAVY = 3;
+    SNIPER = 4;
+    MEDIC = 5;
+    SCRAMBLER = 6;
+    MOBI = 7;
+    BOMBARDIER = 8;
+    BRAMBLE = 9;
+    THORN = 10;
+  }
+  required Class class = 1;
+  
+  // Called 'identifier' in OSN unit, each unit in play gets a unique one.
+  required uint32 identity = 2;
+  
+  // These are expected to be populated.  Their default value of 0 makes them feckless otherwise.
+  optional int32 health = 3;
+  optional MapPosition position = 4;
+  
+  // These are typically constant for a unit but some state changes can affect the ability to move or attack.
+  optional int32 spaces = 5;
+  optional int32 damage = 6;
+  
+  // Brambles and thorns can create progeny (new thorn units) and eliminating a parent will destroy all its progeny.
+  optional int32 parent_id = 7 [default = 0];
+  repeated int32 progeny = 8;  // This can be used as an accumulator to represent all indirect children.
+  
+  // This may change during play if a Scrambler gets control.
+  optional int32 player = 9;
+}
+
+enum MapName {
+  UNDEFINED = 0;
+  MACHINATION = 1;
+  LEGACY_FOUNDRY = 2;
+  FOUNDRY = 3;
+  GLITCH = 4;
+  CANDY_CORE_MINE = 5;
+  SWEETIE_PLAINS = 6;
+  PEEKABOO = 7;
+  BLITZ_BEACH = 8;
+  LONG_NINE = 9;
+  SHARKFOOD_ISLAND = 10;
+  ACROSPIRE = 11;
+  THORN_GULLEY = 12;
+  REAPER = 13;
+  SKULL_DUGGERY = 14;
+  WAR_GARDEN = 15;
+  SWEET_TOOTH = 16;
+  SUGAR_ROCK = 17;
+  MECHANISM = 18;
+}
+
+message Map {
+  required MapName map_name = 1;
+  
+  // optional ...
+  // TODO remaining fields
+}
+
+message MapPosition {
+  required int32 i = 1;
+  required int32 j = 2;
+}
+
+message GameMatch {
+  optional GameState state_zero = 2;
+
+  required GameReplay replay = 3;
+  
+  optional GameState state_omega = 4;
+  repeated PlayerRanking winners = 5;
+  repeated PlayerRanking losers = 6;
+}
+
+message PlayerRanking {
+  uint32 oldLeagueRank = 1;
+  uint32 newLeagueRank = 2;
+  sint32 leaguePointsDelta = 3;
+}
+
+message GameStatistics {
+  required GameReplay replay = 1;
+  
+  // These track the various outcomes that are the result of the turns in the replay (for each player, in order of play) 
+  // including any games resulting from additional turns, as a distribution sample for the entire subtree of game futures.  If 
+  // the last turn in the replay terminates the game then this is the empirical record of recorded replays.  The counts may be
+  // weighted by the rankings of players involved.
+  repeated int32 count_wins = 2;
+  repeated int32 count_losses_base0 = 3;  
+  repeated int32 count_losses_extinct = 4;
+  repeated int32 count_forfeits = 5;
+}
