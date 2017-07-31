@@ -3,24 +3,24 @@ syntax = "proto3";
 package kevindamm.wits;
 
 message GameReplay {
-  required GameState state = 2;
+  /*required*/ GameState state = 1;
   
   repeated Turn turns = 2;
 }
 
 message Turn {
-  optional int32 player_number = 1;
+  int32 player_number = 1;
   repeated Frame frames = 2;
 }
 
 message Frame {
-  required FrameType frame_type = 1;
+  /*required*/ FrameType frame_type = 1;
   
   // TODO remaining frame fields.
 }
 
 enum FrameType {
-  UNDEFINED = 0;
+  UNDEFINED_FRAME = 0;
   MOVE = 1;
   SPAWN = 2;  // Includes both SpawnUnitAction and SpawnThornAction.
   ATTACK = 3;
@@ -40,17 +40,16 @@ enum FrameType {
 }
 
 message GameState {
-  optional MapName map_name = 1;
+  MapName map_name = 1;
   repeated PlayerState players = 2;
   repeated Unit units = 3;
   
-  optional uint32 turn_count = 3;
+  uint32 turn_count = 4;
   
   // TODO other fields
 }
 
 message PlayerState {
-  optional int32 
 }
 
 message Unit {
@@ -68,29 +67,29 @@ message Unit {
     BRAMBLE = 9;
     THORN = 10;
   }
-  required Class class = 1;
+  /*required*/ Class class = 1;
   
   // Called 'identifier' in OSN unit, each unit in play gets a unique one.
-  required uint32 identity = 2;
+  /*required*/ uint32 identity = 2;
   
   // These are expected to be populated.  Their default value of 0 makes them feckless otherwise.
-  optional int32 health = 3;
-  optional MapPosition position = 4;
+  int32 health = 3;
+  MapPosition position = 4;
   
   // These are typically constant for a unit but some state changes can affect the ability to move or attack.
-  optional int32 spaces = 5;
-  optional int32 damage = 6;
+  int32 spaces = 5;
+  int32 damage = 6;
   
   // Brambles and thorns can create progeny (new thorn units) and eliminating a parent will destroy all its progeny.
-  optional int32 parent_id = 7 [default = 0];
+  int32 parent_id = 7;
   repeated int32 progeny = 8;  // This can be used as an accumulator to represent all indirect children.
   
   // This may change during play if a Scrambler gets control.
-  optional int32 player = 9;
+  int32 player = 9;
 }
 
 enum MapName {
-  UNDEFINED = 0;
+  UNDEFINED_MAP = 0;
   MACHINATION = 1;
   LEGACY_FOUNDRY = 2;
   FOUNDRY = 3;
@@ -112,23 +111,22 @@ enum MapName {
 }
 
 message Map {
-  required MapName map_name = 1;
+  /*required*/ MapName map_name = 1;
   
-  // optional ...
   // TODO remaining fields
 }
 
 message MapPosition {
-  required int32 i = 1;
-  required int32 j = 2;
+  /*required*/ int32 i = 1;
+  /*required*/ int32 j = 2;
 }
 
 message GameMatch {
-  optional GameState state_zero = 2;
+  GameState state_zero = 2;
 
-  required GameReplay replay = 3;
+  /*required*/ GameReplay replay = 3;
   
-  optional GameState state_omega = 4;
+  GameState state_omega = 4;
   repeated PlayerRanking winners = 5;
   repeated PlayerRanking losers = 6;
 }
@@ -140,7 +138,7 @@ message PlayerRanking {
 }
 
 message GameStatistics {
-  required GameReplay replay = 1;
+  /*required*/ GameReplay replay = 1;
   
   // These track the various outcomes that are the result of the turns in the replay (for each player, in order of play) 
   // including any games resulting from additional turns, as a distribution sample for the entire subtree of game futures.  If 
